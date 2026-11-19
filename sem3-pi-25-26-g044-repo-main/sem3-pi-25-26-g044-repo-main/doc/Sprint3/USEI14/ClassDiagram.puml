@@ -1,0 +1,191 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class MaximumFlowController {
+    - graphRepository : RailwayGraphRepository
+    - graph : RailwayGraph
+
+    + MaximumFlowController(
+        graphRepository : RailwayGraphRepository
+      )
+
+    + buildGraph() : void
+
+    + computeMaximumFlow(
+        sourceStationId : String,
+        sinkStationId : String
+      ) : MaximumFlowResult
+
+    + getAllStations() : Collection<Station>
+
+    + getStationById(
+        stationId : String
+      ) : Station
+
+    + getGraphStatistics() : String
+}
+
+class FordFulkersonAlgorithm {
+    + {static} computeMaxFlow(
+        graph : RailwayGraph,
+        sourceStationId : String,
+        sinkStationId : String
+      ) : int
+
+    - {static} buildResidualGraph(
+        graph : RailwayGraph
+      ) : Map<String, List<ResidualEdge>>
+
+    - {static} findAugmentingPath(
+        residualGraph : Map<String, List<ResidualEdge>>,
+        source : String,
+        sink : String
+      ) : List<ResidualEdge>
+
+    - {static} reconstructPath(
+        pathInfo : Map<String, PathEntry>,
+        source : String,
+        sink : String
+      ) : List<ResidualEdge>
+
+    - {static} findMinResidualCapacity(
+        path : List<ResidualEdge>
+      ) : int
+
+    - {static} updateResidualGraph(
+        path : List<ResidualEdge>,
+        flow : int
+      ) : void
+}
+
+class MaximumFlowResult {
+    - sourceStation : Station
+    - sinkStation : Station
+    - maxFlowValue : int
+
+    + getSourceStation() : Station
+
+    + getSinkStation() : Station
+
+    + getMaxFlowValue() : int
+
+    + getSourceStationId() : String
+
+    + getSinkStationId() : String
+}
+
+class Station {
+    - id : String
+    - name : String
+    - latitude : double
+    - longitude : double
+    - coordX : double
+    - coordY : double
+
+    + Station(
+        id : String,
+        name : String,
+        latitude : double,
+        longitude : double,
+        coordX : double,
+        coordY : double
+      )
+
+    + getId() : String
+
+    + getName() : String
+
+    + getLatitude() : double
+
+    + getLongitude() : double
+
+    + getCoordX() : double
+
+    + getCoordY() : double
+
+    + equals(obj : Object) : boolean
+
+    + hashCode() : int
+
+    + toString() : String
+}
+
+class RailwayGraph {
+    - nodes : Map<String, Station>
+    - outgoingEdges : Map<String, List<Line>>
+    - incomingEdges : Map<String, List<Line>>
+    - allEdges : List<Line>
+
+    + addNode(
+        node : Station
+      ) : void
+
+    + addEdge(
+        edge : Line
+      ) : void
+
+    + getNode(
+        stationId : String
+      ) : Station
+
+    + getAllNodes() : Collection<Station>
+
+    + getOutgoingEdges(
+        stationId : String
+      ) : List<Line>
+
+    + getIncomingEdges(
+        stationId : String
+      ) : List<Line>
+
+    + getAllEdges() : List<Line>
+
+    + getNodeCount() : int
+
+    + getEdgeCount() : int
+
+    + containsNode(
+        stationId : String
+      ) : boolean
+}
+
+class RailwayGraphRepository {
+    - cachedGraph : RailwayGraph
+    - stationRepository : StationRepository
+    - lineRepository : LineRepository
+    - dataLoader : DataLoader
+
+    + RailwayGraphRepository()
+
+    + RailwayGraphRepository(
+        stationRepository : StationRepository,
+        lineRepository : LineRepository
+      )
+
+    + loadData(
+        stationsPath : String,
+        linesPath : String
+      ) : void
+
+    + buildGraph() : RailwayGraph
+
+    + getStationRepository() : StationRepository
+
+    + getLineRepository() : LineRepository
+}
+
+MaximumFlowController --> RailwayGraphRepository
+MaximumFlowController --> FordFulkersonAlgorithm
+MaximumFlowController ..> MaximumFlowResult
+MaximumFlowController ..> Station
+
+FordFulkersonAlgorithm --> RailwayGraph
+FordFulkersonAlgorithm ..> Station
+
+RailwayGraph "1" --> "0..*" Station : contains
+RailwayGraph "1" --> "0..*" Line : contains
+
+RailwayGraphRepository --> RailwayGraph
+
+@enduml
+

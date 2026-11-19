@@ -1,0 +1,31 @@
+CREATE OR REPLACE FUNCTION getLocomotivesWithMultipleGauges
+RETURN SYS_REFCURSOR
+AS
+    locomotiveResultCursor SYS_REFCURSOR;
+BEGIN
+OPEN locomotiveResultCursor FOR
+SELECT DISTINCT
+    locomotive.LOCOMOTIVE_ID,
+    locomotive.OPERATOR_ID,
+    locomotive.LOCOMOTIVE_MODEL_ID,
+    locomotive.GAUGECODE
+FROM   LOCOMOTIVE locmomotive
+WHERE  locomotive.OPERATOR_ID = 'PT509017800'
+  AND  locomotive.LOCOMOTIVE_MODEL_ID IN (
+    SELECT LOCOMOTIVE_MODEL_ID
+    FROM   LOCOMOTIVE
+    GROUP BY LOCOMOTIVE_MODEL_ID
+    HAVING COUNT(DISTINCT GAUGECODE) > 1
+)
+ORDER BY locomotive.LOCOMOTIVE_ID;
+
+RETURN locomotiveResultCursor;
+END;
+/
+
+
+
+
+
+
+
